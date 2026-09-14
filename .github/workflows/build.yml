@@ -27,6 +27,10 @@ jobs:
       - name: Scaffold Android if missing
         run: flutter create --platforms=android --project-name aniket_pro_ai .
 
+      - name: Patch root build.gradle (gal fix)
+        run: |
+          printf '\next {\n    compileSdkVersion = 34\n    targetSdkVersion = 34\n    minSdkVersion = 21\n}\n' >> android/build.gradle
+
       - name: Get dependencies
         run: flutter pub get
 
