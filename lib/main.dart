@@ -1,10 +1,9 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:gal/gal.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screen_capture_event/screen_capture_event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +12,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 const Color kGold = Color(0xFFF5E6C8);
 const Color kBg = Color(0xFF121212);
 const String kUrl = 'https://aniketsarker-1726.netlify.app';
+const MethodChannel _galleryChannel =
+    MethodChannel('aniket_pro_ai/gallery');
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -191,8 +192,8 @@ class _MainWebViewScreenState extends State<MainWebViewScreen> {
         final bytes = await File(path).readAsBytes();
         final b64 = base64Encode(bytes);
         final name = path.split('/').last;
-        final res =
-            await _controller.runJavaScriptReturningResult(_injectJs(box, b64, name));
+        final res = await _controller
+            .runJavaScriptReturningResult(_injectJs(box, b64, name));
         if (res.toString().contains('ok')) {
           done++;
         } else {
@@ -220,7 +221,8 @@ class _MainWebViewScreenState extends State<MainWebViewScreen> {
       _pushState();
       if (_autoDelete) {
         try {
-          await Gal.delete(delivered);
+          await _galleryChannel
+              .invokeMethod('deleteFiles', {'paths': delivered});
         } catch (e) {
           // ইউজার Allow না চাপলে ফাইল থেকে যাবে - নিরাপদ
         }
@@ -376,10 +378,10 @@ class _MainWebViewScreenState extends State<MainWebViewScreen> {
         children: [
           WebViewWidget(controller: _controller),
           if (_isLoading)
-              Container(
-                  color: kBg,
-                  child: const Center(
-                      child: CircularProgressIndicator(color: kGold))),
+            Container(
+                color: kBg,
+                child:
+                    const Center(child: CircularProgressIndicator(color: kGold))),
           Positioned(
             top: 40,
             right: 15,
