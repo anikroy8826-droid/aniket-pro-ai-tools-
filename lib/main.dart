@@ -206,7 +206,7 @@ class _MainWebViewScreenState extends State<MainWebViewScreen> {
       }
     }
     if (done > 0) {
-      final delivered = batch.take(done).toList();
+      final List<String> delivered = batch.take(done).toList().cast<String>();
       setState(() {
         if (box == 'htf') {
           _cHtf += done;
