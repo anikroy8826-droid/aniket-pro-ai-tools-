@@ -148,15 +148,15 @@ class _MainWebViewScreenState extends State<MainWebViewScreen> {
         'STATE:${_pending.length}|$_cHtf|$_cEntry|$_cCorr|${_captureOn ? 1 : 0}');
   }
 
-  // ---------- Screenshot Detect ----------
+  // ---------- Screenshot Detect (FIXED: stream listen) ----------
   void _initScreenshotListener() {
-    _sce.addListener((String path) {
+    _sce.screenshotStream.listen((String path) {
       if (_captureOn && !_pending.contains(path)) {
         setState(() => _pending.add(path));
         _pushState();
       }
     });
-    _sce.watch();
+    _sce.start();
   }
 
   // ---------- Overlay events ----------
@@ -338,7 +338,7 @@ class _MainWebViewScreenState extends State<MainWebViewScreen> {
     final granted = await FlutterOverlayWindow.isPermissionGranted();
     if (!granted) {
       final ok = await FlutterOverlayWindow.requestPermission();
-      if (!ok) {
+      if (ok != true) {
         _snack('Overlay permission দিন: Settings > Display over other apps');
         return;
       }
@@ -367,7 +367,7 @@ class _MainWebViewScreenState extends State<MainWebViewScreen> {
 
   @override
   void dispose() {
-    _sce.dispose();
+    _sce.stop();
     super.dispose();
   }
 
